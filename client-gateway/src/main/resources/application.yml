@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: client-gateway
+
+server:
+  port: 8080 # Puerto donde tú escribirás localhost:8080 en el navegador
+
+grpc:
+  server:
+    port: -1  # El puerto -1 desactiva el servidor gRPC en este módulo
+  client:
+    wallet-service:
+      address: 'static://127.0.0.1:9090'
+      negotiation-type: plaintext

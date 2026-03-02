@@ -1,0 +1,134 @@
+// =============================================================
+// Archivo: wallet.proto
+// Descripción: Definición completa de un servicio gRPC para un
+//              sistema de monedero digital (wallet) con ejemplos
+//              de todos los tipos de RPC, mensajes complejos,
+//              enumeraciones y comentarios explicativos.
+//
+// Autor: Fran (ejemplo educativo ampliado)
+// =============================================================
+
+// ------------------------------
+// Versión del lenguaje Protobuf
+// ------------------------------
+syntax = "proto3"; // La versión actual más usada (proto3 es más simple que proto2)
+
+// ------------------------------
+// Espacio lógico (namespace) gRPC
+// ------------------------------
+package com.trading.wallet;
+
+// ------------------------------
+// Opciones específicas para Java
+// ------------------------------
+option java_multiple_files = true;       // Genera una clase por mensaje/servicio
+option java_package = "com.trading.wallet"; // Paquete base del código generado
+option java_outer_classname = "WalletProto"; // Nombre del archivo contenedor si fuera uno solo
+
+// =============================================================
+//                     DEFINICIÓN DE SERVICIO
+// =============================================================
+
+service WalletService {
+
+  // -----------------------------------------------------------
+  // 1️⃣ Unary RPC: Petición simple → Respuesta simple
+  // -----------------------------------------------------------
+  // El cliente pide el balance actual de una wallet específica.
+  rpc GetBalance (BalanceRequest) returns (BalanceResponse);
+
+  // -----------------------------------------------------------
+  // 2️⃣ Server Streaming: Petición simple → Flujo de respuestas
+  // -----------------------------------------------------------
+  // El servidor envía múltiples actualizaciones de balance al cliente.
+  rpc StreamBalanceUpdates (BalanceRequest) returns (stream BalanceResponse);
+
+  // -----------------------------------------------------------
+  // 3️⃣ Client Streaming: Flujo de peticiones → Respuesta simple
+  // -----------------------------------------------------------
+  // El cliente envía múltiples actualizaciones (por ejemplo, transacciones)
+  // y al finalizar recibe un resumen consolidado.
+  rpc UploadTransactions (stream Transaction) returns (UploadSummary);
+
+  // -----------------------------------------------------------
+  // 4️⃣ Bidireccional Streaming: Flujo bidireccional
+  // -----------------------------------------------------------
+  // Cliente y servidor mantienen un canal abierto intercambiando
+  // balances de múltiples usuarios en tiempo real.
+  rpc MonitorMultipleWallets (stream BalanceRequest) returns (stream BalanceResponse);
+}
+
+// =============================================================
+//                     DEFINICIÓN DE MENSAJES
+// =============================================================
+
+// ------------------------------
+// Petición básica
+// ------------------------------
+message BalanceRequest {
+  string user_id = 1;  // Campo 1: ID del usuario
+  string wallet_id = 2; // Campo 2: ID de la wallet (opcional)
+}
+
+// ------------------------------
+// Respuesta básica
+// ------------------------------
+message BalanceResponse {
+  double amount = 1;   // Monto actual
+  string currency = 2; // Ej: "EUR", "USD"
+  WalletStatus status = 3; // Estado actual de la wallet (enum)
+}
+
+// ------------------------------
+// Mensaje de transacción
+// ------------------------------
+message Transaction {
+  string tx_id = 1;
+  string user_id = 2;
+  double amount = 3;
+  string currency = 4;
+  TransactionType type = 5;
+  int64 timestamp = 6; // epoch millis
+}
+
+// ------------------------------
+// Resumen de subida de transacciones
+// ------------------------------
+message UploadSummary {
+  int32 total_uploaded = 1; // Número total de transacciones recibidas
+  double total_amount = 2;  // Suma de todos los importes
+  string message = 3;       // Mensaje informativo
+}
+
+// =============================================================
+//                     ENUMERACIONES
+// =============================================================
+
+// Estado de la wallet
+enum WalletStatus {
+  UNKNOWN = 0;     // Valor por defecto (obligatorio en proto3)
+  ACTIVE = 1;      // Activa y operativa
+  SUSPENDED = 2;   // Temporalmente bloqueada
+  CLOSED = 3;      // Cerrada permanentemente
+}
+
+// Tipo de transacción
+enum TransactionType {
+  DEPOSIT = 0;
+  WITHDRAWAL = 1;
+  TRANSFER = 2;
+}
+
+// =============================================================
+//                     BUENAS PRÁCTICAS
+// =============================================================
+//
+// 🔸 Cada campo tiene un número (tag). No lo cambies nunca una vez en producción.
+// 🔸 Puedes añadir nuevos campos sin romper compatibilidad.
+// 🔸 No reutilices tags antiguos.
+// 🔸 Usa enums para estados o tipos.
+// 🔸 Usa nombres consistentes: Request / Response / Summary.
+// 🔸 Define un package y java_package siempre que trabajes con gRPC en Java.
+// 🔸 Usa streams cuando haya flujos de datos continuos (no abusar).
+// 🔸 Documenta bien el archivo .proto: es tu contrato público.
+//

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: wallet-service
+
+server:
+  port: 8081 # Puerto HTTP para Actuator/Health (opcional)
+
+grpc:
+  server:
+    port: 9090 # EL PUERTO SAGRADO DE gRPC
